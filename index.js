@@ -8,7 +8,7 @@ const divide = (x, y) => x / y;
 let operator = replaceWithCurrentInput;
 let lastOutput = 0;
 let currentInput = [];
-let lastInputType = "operator"; /* "number" or "operator" */
+let lastInputType = "operator"; /* "number" or "operator" or "error" */
 
 function clear() {
   operator = replaceWithCurrentInput;
@@ -18,22 +18,37 @@ function clear() {
 }
 
 function inputDigit(digitInput) {
-  currentInput.push(digitInput);
-  lastInputType = "number";
+  if (lastInputType === "error") {
+    return;
+  }
+  if (lastInputType === "number" || lastInputType === "operator") {
+    currentInput.push(digitInput);
+    lastInputType = "number";
+    return;
+  }
+  throw new Error("Invalid state!");
 }
 
 function inputOperator(operatorInput) {
-  if (lastInputType !== "number" && lastInputType !== "operator") {
-    throw new Error("Invalid state!");
+  if (lastInputType === "error") {
+    return;
   }
   if (lastInputType === "number") {
     const currentInputNumber =
       currentInput.length === 0 ? 0 : Number(currentInput.join(""));
     lastOutput = operator(lastOutput, currentInputNumber);
+    currentInput = [];
+    operator = operatorInput;
+    lastInputType = Number.isFinite(lastOutput) ? "operator" : "error";
+    return;
   }
-  currentInput = [];
-  operator = operatorInput;
-  lastInputType = "operator";
+  if (lastInputType === "operator") {
+    currentInput = [];
+    operator = operatorInput;
+    lastInputType = "operator";
+    return;
+  }
+  throw new Error("Invalid state!");
 }
 
 function formatNumber(x) {
@@ -47,7 +62,7 @@ function getTextToDisplay() {
   if (lastInputType === "operator") {
     return formatNumber(lastOutput);
   }
-  throw new Error("Invalid state!");
+  return "Error! X.X";
 }
 
 const resultDisplayElement = document.querySelector("#result");
