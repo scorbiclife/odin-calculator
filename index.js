@@ -77,6 +77,11 @@ for (let i = 0; i <= 9; ++i) {
   });
 }
 
+document.querySelector("#symbol-dot")?.addEventListener("click", () => {
+  inputDigit(".");
+  populateDisplay();
+});
+
 document.querySelector("#symbol-plus")?.addEventListener("click", () => {
   inputOperator(add);
   populateDisplay();
