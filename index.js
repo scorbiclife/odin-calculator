@@ -1,5 +1,11 @@
+// Note: we treat special states using custom operators.
+
+// The operator that corresponds to the equals key.
 const getLastOutput = (lastOutput, _currentInput) => lastOutput;
+
+// The operator that corresponds to the inital state.
 const replaceWithCurrentInput = (_lastOutput, currentInput) => currentInput;
+
 const add = (x, y) => x + y;
 const subtract = (x, y) => x - y;
 const multiply = (x, y) => x * y;
