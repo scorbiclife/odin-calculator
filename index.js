@@ -1,79 +1,165 @@
-// Note: we treat special states using custom operators.
-
-// The operator that corresponds to the equals key.
-const getLastOutput = (lastOutput, _currentInput) => lastOutput;
-
-// The operator that corresponds to the inital state.
-const replaceWithCurrentInput = (_lastOutput, currentInput) => currentInput;
-
 const add = (x, y) => x + y;
 const subtract = (x, y) => x - y;
 const multiply = (x, y) => x * y;
 const divide = (x, y) => x / y;
 
-let operator = replaceWithCurrentInput;
-let lastOutput = 0;
-let currentInput = [];
-let lastInputType = "operator"; /* "number" or "operator" or "error" */
+/**
+ * { step: "error" }
+ * or { step: "num1", input1: string[] }
+ * or { step: "op", number1: number, operator: function }
+ * or { step: "num2", number1: number, operator: function, input2: string[] }
+ * or { step: "result", number: number }
+ */
+let currentState = {
+  step: "result",
+  number: 0,
+};
 let dotInputDuringNumberInput = false;
 
 function clear() {
-  operator = replaceWithCurrentInput;
-  lastOutput = 0;
-  currentInput = [];
-  lastInputType = "operator";
+  currentState = {
+    step: "result",
+    number: 0,
+  };
+  dotInputDuringNumberInput = false;
 }
 
 function inputDigit(digitInput) {
-  if (lastInputType === "error") {
-    return;
+  switch (currentState.step) {
+    case "error":
+      return;
+    case "num1":
+      currentState.input1.push(digitInput);
+      return;
+    case "op":
+      currentState = {
+        step: "num2",
+        number1: currentState.number1,
+        operator: currentState.operator,
+        input2: [digitInput],
+      };
+      return;
+    case "num2":
+      currentState.input2.push(digitInput);
+      return;
+    case "result":
+      // when you input a digit after a result,
+      // the old result is cleared and a new calculation is started with the new input.
+      currentState = {
+        step: "num1",
+        input1: [digitInput],
+      };
+      return;
+    default:
+      throw new Error("Invalid state!");
   }
-  if (lastInputType === "number" || lastInputType === "operator") {
-    currentInput.push(digitInput);
-    lastInputType = "number";
-    return;
-  }
-  throw new Error("Invalid state!");
 }
 
 function removeDigit() {
-  if (lastInputType === "error") {
-    return;
+  switch (currentState.step) {
+    case "error":
+      return;
+    case "num1":
+      currentState.input1.pop();
+      return;
+    case "op":
+      return;
+    case "num2":
+      currentState.input2.pop();
+      return;
+    case "result":
+      return;
+    default:
+      throw new Error("Invalid state!");
   }
-  if (lastInputType === "number") {
-    if (currentInput.length > 0) {
-      currentInput.pop();
-    }
-    return;
-  }
-  if (lastInputType === "operator") {
-    return;
-  }
-  throw new Error("Invalid state!");
 }
 
-function inputOperator(operatorInput) {
-  if (lastInputType === "error") {
-    return;
+function getNumberFromInput(input) {
+  return input.length === 0 ? 0 : Number(input.join(""));
+}
+
+function inputOperator(operator) {
+  dotInputDuringNumberInput = false;
+  switch (currentState.step) {
+    case "error":
+      return;
+    case "num1":
+      currentState = {
+        step: "op",
+        number1: getNumberFromInput(currentState.input1),
+        operator,
+      };
+      return;
+    case "op":
+      // When two consecutive operators are entered, only the last one takes effect.
+      currentState = {
+        step: "op",
+        number1: currentState.number1,
+        operator,
+      };
+      return;
+    case "num2":
+      getResult();
+      inputOperator(operator);
+      return;
+    case "result":
+      currentState = {
+        step: "op",
+        number1: currentState.number,
+        operator,
+      };
+      return;
+    default:
+      throw new Error("Invalid state!");
   }
-  if (lastInputType === "number") {
-    const currentInputNumber =
-      currentInput.length === 0 ? 0 : Number(currentInput.join(""));
-    lastOutput = operator(lastOutput, currentInputNumber);
-    currentInput = [];
-    operator = operatorInput;
-    lastInputType = Number.isFinite(lastOutput) ? "operator" : "error";
-    dotInputDuringNumberInput = false;
-    return;
+}
+
+function operate(operator, number1, number2) {
+  const result = operator(number1, number2);
+  if (Number.isFinite(result)) {
+    currentState = {
+      step: "result",
+      number: result,
+    };
+  } else {
+    // if the result is an invalid number (infinity or NaN), go to error state.
+    currentState = {
+      step: "error",
+    };
   }
-  if (lastInputType === "operator") {
-    currentInput = [];
-    operator = operatorInput;
-    lastInputType = "operator";
-    dotInputDuringNumberInput = false;
-    return;
+}
+
+function getResult() {
+  dotInputDuringNumberInput = false;
+  switch (currentState.step) {
+    case "error":
+      return;
+    case "num1":
+      currentState = {
+        step: "result",
+        number: getNumberFromInput(currentState.input1),
+      };
+      return;
+    case "op":
+      operate(
+        currentState.operator,
+        currentState.number1,
+        currentState.number1
+      );
+      return;
+    case "num2": {
+      operate(
+        currentState.operator,
+        currentState.number1,
+        getNumberFromInput(currentState.input2)
+      );
+      return;
+    }
+    case "result":
+      return;
+    default:
+      throw new Error("Invalid state!");
   }
-  throw new Error("Invalid state!");
 }
 
 function formatNumber(x) {
@@ -81,13 +167,20 @@ function formatNumber(x) {
 }
 
 function getTextToDisplay() {
-  if (lastInputType === "number") {
-    return currentInput.join("");
+  switch (currentState.step) {
+    case "error":
+      return "Error! X.X";
+    case "num1":
+      return formatNumber(getNumberFromInput(currentState.input1));
+    case "op":
+      return formatNumber(currentState.number1);
+    case "num2":
+      return formatNumber(getNumberFromInput(currentState.input2));
+    case "result":
+      return formatNumber(currentState.number);
+    default:
+      throw new Error("Invalid state!");
   }
-  if (lastInputType === "operator") {
-    return formatNumber(lastOutput);
-  }
-  return "Error! X.X";
 }
 
 const resultDisplayElement = document.querySelector("#result");
@@ -141,7 +234,7 @@ document.querySelector("#symbol-division")?.addEventListener("click", () => {
 });
 
 document.querySelector("#symbol-equals")?.addEventListener("click", () => {
-  inputOperator(getLastOutput);
+  getResult();
   updateView();
 });
 
