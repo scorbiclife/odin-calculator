@@ -9,6 +9,7 @@ let operator = replaceWithCurrentInput;
 let lastOutput = 0;
 let currentInput = [];
 let lastInputType = "operator"; /* "number" or "operator" or "error" */
+let dotInputDuringNumberInput = false;
 
 function clear() {
   operator = replaceWithCurrentInput;
@@ -40,12 +41,14 @@ function inputOperator(operatorInput) {
     currentInput = [];
     operator = operatorInput;
     lastInputType = Number.isFinite(lastOutput) ? "operator" : "error";
+    dotInputDuringNumberInput = false;
     return;
   }
   if (lastInputType === "operator") {
     currentInput = [];
     operator = operatorInput;
     lastInputType = "operator";
+    dotInputDuringNumberInput = false;
     return;
   }
   throw new Error("Invalid state!");
@@ -66,55 +69,68 @@ function getTextToDisplay() {
 }
 
 const resultDisplayElement = document.querySelector("#result");
+
 function populateDisplay() {
   resultDisplayElement.textContent = getTextToDisplay();
+}
+
+const dotButton = document.querySelector("#symbol-dot");
+
+function refreshDotButton() {
+  dotButton.disabled = dotInputDuringNumberInput;
+}
+
+function updateView() {
+  populateDisplay();
+  refreshDotButton();
 }
 
 for (let i = 0; i <= 9; ++i) {
   document.querySelector(`#number-${i}`)?.addEventListener("click", () => {
     inputDigit(`${i}`);
-    populateDisplay();
+    updateView();
   });
 }
 
-document.querySelector("#symbol-dot")?.addEventListener("click", () => {
+dotButton?.addEventListener("click", () => {
   inputDigit(".");
-  populateDisplay();
+  dotInputDuringNumberInput = true;
+  updateView();
 });
 
 document.querySelector("#symbol-plus")?.addEventListener("click", () => {
   inputOperator(add);
-  populateDisplay();
+  updateView();
 });
 
 document.querySelector("#symbol-minus")?.addEventListener("click", () => {
   inputOperator(subtract);
-  populateDisplay();
+  updateView();
 });
 
 document.querySelector("#symbol-times")?.addEventListener("click", () => {
   inputOperator(multiply);
-  populateDisplay();
+  updateView();
 });
 
 document.querySelector("#symbol-division")?.addEventListener("click", () => {
   inputOperator(divide);
-  populateDisplay();
+  updateView();
 });
 
 document.querySelector("#symbol-equals")?.addEventListener("click", () => {
   inputOperator(getLastOutput);
-  populateDisplay();
+  updateView();
 });
 
 document.querySelector("#control-clear")?.addEventListener("click", () => {
   clear();
-  populateDisplay();
+  updateView();
 });
 
 function init() {
   clear();
-  populateDisplay();
+  updateView();
 }
 
 document.addEventListener("DOMContentLoaded", init);
