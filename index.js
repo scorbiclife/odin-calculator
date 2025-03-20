@@ -30,6 +30,22 @@ function inputDigit(digitInput) {
   throw new Error("Invalid state!");
 }
 
+function removeDigit() {
+  if (lastInputType === "error") {
+    return;
+  }
+  if (lastInputType === "number") {
+    if (currentInput.length > 0) {
+      currentInput.pop();
+    }
+    return;
+  }
+  if (lastInputType === "operator") {
+    return;
+  }
+  throw new Error("Invalid state!");
+}
+
 function inputOperator(operatorInput) {
   if (lastInputType === "error") {
     return;
@@ -120,6 +136,11 @@ document.querySelector("#symbol-division")?.addEventListener("click", () => {
 
 document.querySelector("#symbol-equals")?.addEventListener("click", () => {
   inputOperator(getLastOutput);
+  updateView();
+});
+
+document.querySelector("#control-backspace")?.addEventListener("click", () => {
+  removeDigit();
   updateView();
 });
 
