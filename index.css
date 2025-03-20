@@ -66,8 +66,8 @@ h1 {
   height: 48px;
 }
 
-.calculator-full-row {
-  flex: 1 1 100%;
+.calculator-button--double-size {
+  width: 104px;
 }
 
 .calculator-space-remaining-row {
@@ -98,4 +98,12 @@ h1 {
   color: black;
   border: none;
   border-radius: 8px;
+}
+
+.calculator-button--red {
+  background-color: lightcoral;
+}
+
+.calculator-button--yellow {
+  background-color: lightyellow;
 }

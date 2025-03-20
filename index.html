@@ -13,10 +13,11 @@
       <div class="calculator-top calculator-display" id="result"></div>
       <div class="calculator-left calculator-button-container">
         <button
-          class="calculator-button calculator-full-row"
+          class="calculator-button calculator-button--red calculator-button--double-size"
           id="control-clear">
           Clear
         </button>
+        <button class="calculator-button" id="control-backspace">⌫</button>
         <button class="calculator-button" id="number-7">7</button>
         <button class="calculator-button" id="number-8">8</button>
         <button class="calculator-button" id="number-9">9</button>
@@ -26,7 +27,11 @@
         <button class="calculator-button" id="number-1">1</button>
         <button class="calculator-button" id="number-2">2</button>
         <button class="calculator-button" id="number-3">3</button>
-        <button class="calculator-button" id="number-0">0</button>
+        <button
+          class="calculator-button calculator-button--double-size"
+          id="number-0">
+          0
+        </button>
         <button
           class="calculator-button calculator-space-remaining-row"
           id="symbol-dot">
@@ -34,11 +39,31 @@
         </button>
       </div>
       <div class="calculator-right calculator-button-container">
-        <button class="calculator-button" id="symbol-plus">+</button>
-        <button class="calculator-button" id="symbol-minus">-</button>
-        <button class="calculator-button" id="symbol-times">×</button>
-        <button class="calculator-button" id="symbol-division">÷</button>
-        <button class="calculator-button" id="symbol-equals">=</button>
+        <button
+          class="calculator-button calculator-button--yellow"
+          id="symbol-plus">
+          +
+        </button>
+        <button
+          class="calculator-button calculator-button--yellow"
+          id="symbol-minus">
+          -
+        </button>
+        <button
+          class="calculator-button calculator-button--yellow"
+          id="symbol-times">
+          ×
+        </button>
+        <button
+          class="calculator-button calculator-button--yellow"
+          id="symbol-division">
+          ÷
+        </button>
+        <button
+          class="calculator-button calculator-button--yellow"
+          id="symbol-equals">
+          =
+        </button>
       </div>
     </div>
     <script src="./index.js"></script>
